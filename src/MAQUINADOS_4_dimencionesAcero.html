@@ -22,9 +22,7 @@
 
     <!-- Shape and Material Selection Section -->
     <div class="container mt-4">
-        <div class="row g-3">
-            <!-- Shape Selection -->
-            <div class="col-md-6">
+        <div class="row align-items-center">
                 <label for="selec_figura" class="form-label">Selecciona la forma</label>
                 <select class="form-select" id="selec_figura">
                     <option value="1" selected>HEXÁGONO</option>
@@ -35,65 +33,68 @@
                     <option value="6">PERFIL T</option>
                     <option value="7">PERFIL DOBLE T</option>
                     <option value="8">PERFIL U</option>
-                    <option value="9">ANGULO</option>
+                    <option value="9">ÁNGULO</option>
                     <option value="10">PLETINA</option>
                     <option value="11">CHAPA</option>
                 </select>
             </div>
             
             <!-- Material Selection -->
-            <div class="col-md-6">
-                <label for="selec_material" class="form-label">Selecciona el material</label>
-                <select class="form-select" id="selec_material">
-                    <option value="acero" selected>Acero</option>
-                    <option value="aluminio">Aluminio</option>
-                    <option value="laton">Latón</option>
-                    <option value="cobre">Cobre</option>
-                    <option value="bronce">Bronce</option>
-                    <option value="zinc">Zinc</option>
-                    <option value="chromo">Chromo</option>
-                    <option value="dirigir">Dirigir</option>
-                    <option value="hierro">Hierro</option>
-                    <option value="oro">Oro</option>
-                    <option value="magnesio">Magnesio</option>
-                    <option value="niquel">Níquel</option>
-                    <option value="titanio">Titanio</option>
-                    <option value="estaño">Estaño</option>
-                    <option value="teflon">Teflón</option>
-                    <option value="plata">Plata</option>
-                    <option value="platino">Platino</option>
-                    <option value="inox_304_310">Inox 304/310</option>
-                    <option value="inox_316_321">Inox 316/321</option>
-                    <option value="inox_410_430">Inox 410/430</option>
-                    <option value="circonio">Circonio</option>
-                    <option value="molibdeno">Molibdeno</option>
-                </select>
-            </div>
-        </div>
-
-        <!-- Calculation Mode Buttons -->
-        <div class="row mt-3">
-            <div class="col-12">
-                <div class="btn-group w-100" role="group">
-                    <button type="button" class="btn btn-outline-primary active" id="btn_por_longitud">Por longitud</button>
-                    <button type="button" class="btn btn-outline-primary" id="btn_por_peso">Por peso</button>
+                 <!-- Steel Type & Dimensions Section -->
+            <div class="container mt-4">
+                <div class="row align-items-center">
+                    <div class="col-md-6 text-center">
+                        <img src="../img/hexagono.png" class="img-fluid" alt="Imagen de figura" id="img_figura">
+                    </div>
+                <div class="col-md-6">
+                    <label for="selec_material" class="form-label">Selecciona el material</label>
+                    <select class="form-select" id="selec_material">
+                        <option value="acero" selected>Acero</option>
+                        <option value="aluminio">Aluminio</option>
+                        <option value="laton">Latón</option>
+                        <option value="cobre">Cobre</option>
+                        <option value="bronce">Bronce</option>
+                        <option value="zinc">Zinc</option>
+                        <option value="chromo">Cromo</option>
+                        <option value="dirigir">Dirigir</option> 
+                        <option value="hierro">Hierro</option>
+                        <option value="oro">Oro</option>
+                        <option value="magnesio">Magnesio</option>
+                        <option value="niquel">Níquel</option>
+                        <option value="titanio">Titanio</option>
+                        <option value="estaño">Estaño</option>
+                        <option value="teflon">Teflón</option>
+                        <option value="plata">Plata</option>
+                        <option value="platino">Platino</option>
+                        <option value="inox_304_310">Inox 304/310</option>
+                        <option value="inox_316_321">Inox 316/321</option>
+                        <option value="inox_410_430">Inox 410/430</option>
+                        <option value="circonio">Circonio</option>
+                        <option value="molibdeno">Molibdeno</option>
+                    </select>
+                    <table class="table table-bordered text-center mt-3">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <button type="button" class="btn btn-outline-primary active" id="btn_por_longitud">Por longitud</button>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-outline-primary" id="btn_por_peso">Por peso</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <label class="form-label">Densidad del material (g/cm³)</label>
+                                    <input type="number" class="form-control" id="densidad_material" readonly>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
-            <div class="col-12 mt-2">
-                <label class="form-label">Densidad del material (g/cm³)</label>
-                <input type="number" class="form-control" id="densidad_material" readonly>
-            </div>
         </div>
     </div>
 
-    <!-- Steel Type & Dimensions Section -->
-    <div class="container mt-4">
-        <div class="row align-items-center">
-            <div class="col-md-6 text-center">
-                <img src="../img/hexagono.png" class="img-fluid" alt="Imagen de figura" id="img_figura">
-            </div>
-        </div>
-    </div>
 
     <!-- Inputs for Dimensions & Pricing -->
     <div class="container mt-4" id="campos_dimensiones">
