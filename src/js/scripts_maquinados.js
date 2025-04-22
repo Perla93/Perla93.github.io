@@ -2,13 +2,14 @@
 // FUNCIONALIDAD DE NAVEGACIÓN ENTRE PÁGINAS
 // =============================================
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
     // Mapeo de botones y sus páginas destino
     const botonesNavegacion = {
         "btn_aceptar_tipoMaterial": "MAQUINADOS_4_dimencionesAcero.html",
-        "btn_aceptar_dimencionesAcero": "volumenInicial.html",
-        "btn_aceptar_volumenInicial": "volumenFinal.html",
-        "btn_aceptar_volumenFinal": "tiempoMaquina.html"
+        "btn_aceptar_depreciacionMaquina": "MAQUINADOS_9_costoOperacion.html",
+        "btn_siguiente_costosOperacion": "MAQUINADOS_10_costosGenerales.html",
+        "btn_aceptar_costoGeneral": "MAQUINADOS_11_resumenCostos.html",
+        "btn_Regresar_Menu": "index.html"
     };
 
     // Configurar event listeners para navegación
@@ -23,8 +24,7 @@ document.addEventListener("DOMContentLoaded", function() {
 // =============================================
 // MANEJO DE CHECKBOXES PARA TIPO DE MAQUINADO
 // =============================================
-
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
     const btnAceptar = document.getElementById("btn_aceptar_tipoMaquinado");
     const btnLimpiar = document.getElementById("btn_limpiar_tipoMaquinado");
 
@@ -36,9 +36,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Evento para el botón aceptar
     if (btnAceptar) {
-        btnAceptar.addEventListener("click", function() {
+        btnAceptar.addEventListener("click", function () {
             const seleccionados = getCheckboxesSeleccionados();
-            
+
             if (seleccionados.length === 0) {
                 Swal.fire({
                     title: '¡Atención!',
@@ -48,7 +48,11 @@ document.addEventListener("DOMContentLoaded", function() {
                 });
                 return;
             }
-            
+            const especialesSeleccionados = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
+            .filter(cb => cb.value === '2')
+            .map(cb => cb.id);
+        localStorage.setItem('acabadosEspeciales', JSON.stringify(especialesSeleccionados));
+
             Swal.fire({
                 title: 'Tipos de maquinado seleccionados',
                 html: `Has seleccionado:<br>• ${seleccionados.join('<br>• ')}`,
@@ -64,6 +68,7 @@ document.addEventListener("DOMContentLoaded", function() {
             }).then((result) => {
                 if (result.isConfirmed) {
                     window.location.href = "MAQUINADOS_3_tipoMaterial.html";
+                    // window.location.href = "MAQUINADOS_10_costosGenerales.html";
                 } else if (result.isDenied) {
                     document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
                 }
@@ -73,7 +78,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Evento para el botón limpiar
     if (btnLimpiar) {
-        btnLimpiar.addEventListener("click", function() {
+        btnLimpiar.addEventListener("click", function () {
             document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
             Swal.fire({
                 title: '¡Listo!',
@@ -83,6 +88,7 @@ document.addEventListener("DOMContentLoaded", function() {
             });
         });
     }
+   
 });
 
 // Selectores de tipos de material
@@ -113,7 +119,7 @@ document.addEventListener("DOMContentLoaded", function () {
         "Aceros para trabajo en caliente": {
             proveedores: ["UDDEHOLM", "BOHLER", "AISI"],
             subtipos: {
-                UDDEHOLM: ["ORVAR-2M", "ORVAR SUPREME", "DIEVAR","W360 ISOBLOC","QRO-90 SUPREME", "VEX"],
+                UDDEHOLM: ["ORVAR-2M", "ORVAR SUPREME", "DIEVAR", "W360 ISOBLOC", "QRO-90 SUPREME", "VEX"],
                 BOHLER: ["W302", "W302 ISOBLOC", "W360 ISOBLOC", "W400"],
                 AISI: ["H13", "H13 PREMIUM", "H11"]
             }
@@ -217,376 +223,221 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 });
-        
 
-    // =============================================
-    // CALCULADORA DE DIMENSIONES DE ACERO
-    // =============================================
-document.addEventListener("DOMContentLoaded", function() {
-    // =============================================
-    // CONFIGURACIONES Y CONSTANTES
-    // =============================================
-    const CONFIG = {
-        imagenes: {
-            1: '../img/hexagono.png',
-            2: '../img/cilindro.jpeg',
-            3: '../img/tubo_redondo.jpg',
-            4: '../img/cuadrado.png',
-            5: '../img/tubo_cuadrado.jpg',
-            6: '../img/perfil_t.png',
-            7: '../img/perfil_doble_t.png',
-            8: '../img/perfil_u.png',
-            9: '../img/angulo.png',
-            10: '../img/pletina.avif',
-            11: '../img/chapa.jpg'
-        },
-        densidades: {
-            'acero': 7.85,
-            'aluminio': 2.73,
-            'laton': 8.55,
-            'cobre': 8.93,
-            'bronce': 8.88,
-            'zinc': 7.2,
-            'chromo': 7.1,
-            'dirigir': 11.37,
-            'hierro': 7.86,
-            'oro': 19.36,
-            'magnesio': 1.7,
-            'niquel': 8.85,
-            'titanio': 4.5,
-            'estano': 7.26,
-            'teflon': 2.2,
-            'plata': 10.5,
-            'platino': 21.45,
-            'inox_304_310': 7.92,
-            'inox_316_321': 7.94,
-            'inox_410_430': 7.71,
-            'circonio': 6.51,
-            'molibdeno': 10.28
-        },
-        camposPorFigura: {
-            1: { // HEXÁGONO
-                longitud: ['ancho B', 'longitud', 'cantidad'],
-                peso: ['ancho B', 'peso', 'cantidad']
-            },
-            2: { // REDONDO
-                longitud: ['diametro D', 'longitud', 'cantidad'],
-                peso: ['diametro D', 'peso', 'cantidad']
-            },
-            3: { // TUBO REDONDO
-                longitud: ['diametro D', 'espesor T', 'longitud', 'cantidad'],
-                peso: ['diametro D', 'espesor T', 'peso', 'cantidad']
-            },
-            4: { // CUADRADO
-                longitud: ['alto A', 'longitud', 'cantidad'],
-                peso: ['alto A', 'peso', 'cantidad']
-            },
-            5: { // TUBO CUADRADO
-                longitud: ['alto A', 'ancho B', 'espesor T', 'longitud', 'cantidad'],
-                peso: ['alto A', 'ancho B', 'espesor T', 'peso', 'cantidad']
-            },
-            6: { // PERFIL T
-                longitud: ['alto A', 'ancho B', 'espesor T', 'longitud', 'cantidad'],
-                peso: ['alto A', 'ancho B', 'espesor T', 'peso', 'cantidad']
-            },
-            7: { // PERFIL DOBLE T
-                longitud: ['alto A', 'ancho B', 'espesor T', 'espesor S', 'longitud', 'cantidad'],
-                peso: ['alto A', 'ancho B', 'espesor T', 'espesor S', 'peso', 'cantidad']
-            },
-            8: { // PERFIL U
-                longitud: ['alto A', 'ancho B', 'espesor T', 'espesor S', 'longitud', 'cantidad'],
-                peso: ['alto A', 'ancho B', 'espesor T', 'espesor S', 'peso', 'cantidad']
-            },
-            9: { // ANGULO
-                longitud: ['alto A', 'ancho B', 'espesor T', 'longitud', 'cantidad'],
-                peso: ['alto A', 'ancho B', 'espesor T', 'peso', 'cantidad']
-            },
-            10: { // PLETINA
-                longitud: ['alto A', 'ancho B', 'longitud', 'cantidad'],
-                peso: ['alto A', 'ancho B', 'peso', 'cantidad']
-            },
-            11: { // CHAPA
-                longitud: ['alto A', 'ancho B', 'espesor T', 'longitud', 'cantidad'],
-                peso: ['alto A', 'ancho B', 'espesor T', 'peso', 'cantidad']
-            }
-        },
-        conversionUnidades: {
-            '1': val => val,       // mm
-            '2': val => val * 10,   // cm
-            '3': val => val * 25.4,  // in
-            '4': val => val * 304.8  // ft
-        }
-    };
 
-    // =============================================
-    // ELEMENTOS DEL DOM
-    // =============================================
-    const elementos = {
-        selecFigura: document.getElementById('selec_figura'),
-        imgFigura: document.getElementById('img_figura'),
-        btnLimpiar: document.getElementById('btn_limpiar_dimencionAcero'),
-        inputs: {
-            diametro: document.getElementById('number_diametro'),
-            alto: document.getElementById('number_alto'),
-            ancho: document.getElementById('number_ancho'),
-            espesorT: document.getElementById('number_espesorT'),
-            espesorS: document.getElementById('number_espesorS'),
-            longitud: document.getElementById('number_longitud'),
-            peso: document.getElementById('number_peso'),
-            cantidad: document.getElementById('number_cantidad'),
-            precio: document.getElementById('number_precio')
-        },
-        botonesModo: {
-            longitud: document.getElementById('btn_por_longitud'),
-            peso: document.getElementById('btn_por_peso')
-        },
-        densidadMaterial: document.getElementById('densidad_material'),
-        selecMaterial: document.getElementById('selec_material'),
-        resultados: {
-            longitud: document.getElementById('resultados_longitud'),
-            peso: document.getElementById('resultados_peso')
-        }
-    };
+// ========================================================
+// DEPRECIACION MAQUINARIA HORA - HOMBRE
+// ========================================================
 
-    // =============================================
-    // ESTADO DE LA APLICACIÓN
-    // =============================================
-    let estado = {
-        modoCalculo: 'longitud',
-        figuraActual: '1',
-        materialActual: 'acero'
-    };
+document.addEventListener("DOMContentLoaded", function () {
+    // Variables locales solo para mostrar
+    let wo = 0;
 
-    // =============================================
-    // FUNCIONES UTILITARIAS
-    // =============================================
-    const getValorInput = (input, conUnidad = false) => {
-        const valor = parseFloat(input.value) || 0;
-        if (!conUnidad) return valor;
+    // Página 1 – Calcular valorM y guardar
+    function calcularvalorM() {
+        const sueldoSemanal = parseFloat(document.getElementById('txt_sueldo').value) || 0;
+        const porcentaje_wo = parseFloat(document.getElementById('txt_porcentajeTrabajador').value) || 0;
+        const costoMaquinaria = parseFloat(document.getElementById('txt_costoMaquina').value) || 0;
+        const porcentaje_mt = parseFloat(document.getElementById('txt_porcentajeMaquinaria').value) || 0;
 
-        const unidad = document.querySelector(`#${input.id} + select`)?.value || '1';
-        return CONFIG.conversionUnidades[unidad](valor);
-    };
+        const horasPorSemana = 48;
+        const minutosPorHora = 60;
+        wo = sueldoSemanal / (horasPorSemana * minutosPorHora); // Pago por minuto
 
-    const mostrarElementos = (elementosMostrar) => {
-        document.querySelectorAll('.input-dinamico').forEach(el => el.style.display = 'none');
-        elementosMostrar.forEach(campo => {
-            const elemento = document.querySelector(`[data-campo="${campo}"]`);
-            if (elemento) elemento.style.display = 'block';
-        });
-    };
+        const minutosEnUnAnio = 365 * 24 * 60;
+        const mt = costoMaquinaria / minutosEnUnAnio; // Costo máquina por minuto
 
-    // =============================================
-    // FUNCIONES PRINCIPALES
-    // =============================================
-    const actualizarInterfaz = () => {
-        // Actualizar campos visibles
-        const campos = CONFIG.camposPorFigura[estado.figuraActual][estado.modoCalculo];
-        mostrarElementos([...campos, 'cantidad']);
+        const valorM = wo + (porcentaje_wo / 100) * wo + mt + (porcentaje_mt / 100) * mt;
 
-        // Actualizar visibilidad de resultados
-        elementos.resultados.longitud.style.display = estado.modoCalculo === 'longitud' ? 'block' : 'none';
-        elementos.resultados.peso.style.display = estado.modoCalculo === 'peso' ? 'block' : 'none';
+        // Guardar sin redondear
+        // Página 1 – Al guardar en localStorage
+        localStorage.setItem("valorM", parseFloat(valorM.toFixed(3)));
+        localStorage.setItem("mt", parseFloat(mt.toFixed(3)));
 
-        // Actualizar visibilidad de precio
-        document.getElementById('precio-kg-container').style.display = estado.modoCalculo === 'peso' ? 'none' : 'block';
-    };
+        console.log("mt guardado:", mt);
+        console.log("valorM guardado:", valorM);
 
-    const calcularPorLongitud = (valores, densidad) => {
-        const { altoA, anchoB, diametro, espesorT, espesorS, longitud, cantidad, precioKg } = valores;
-        let pesoUnitario = 0;
+        // Mostrar con redondeo visual
+        const campoSueldoMin = document.getElementById('txt_sueldoMinuto');
+        if (campoSueldoMin) campoSueldoMin.value = wo.toFixed(3);
 
-        switch(estado.figuraActual) {
-            case '1': // HEXÁGONO
-                pesoUnitario = (2.598 * (anchoB ** 2) * longitud * densidad) / 1000000;
-                break;
-            case '2': // REDONDO
-                pesoUnitario = (Math.PI * (diametro ** 2) / 4 * longitud * densidad) / 1000000;
-                break;
-            case '3': // TUBO REDONDO
-                const diametroInterior = diametro - 2 * espesorT;
-                pesoUnitario = (Math.PI * (diametro ** 2 - diametroInterior ** 2) / 4 * longitud * densidad) / 1000000;
-                break;
-            case '4': // CUADRADO
-                pesoUnitario = (altoA * altoA * longitud * densidad) / 1000000;
-                break;
-            case '5': // TUBO CUADRADO
-                const areaExterior = altoA * anchoB;
-                const areaInterior = (altoA - 2*espesorT) * (anchoB - 2*espesorT);
-                pesoUnitario = ((areaExterior - areaInterior) * longitud * densidad) / 1000000;
-                break;
-            case '6': // PERFIL T
-            case '9': // ANGULO
-                pesoUnitario = ((altoA * espesorT) + ((anchoB - espesorT) * espesorT)) * longitud * densidad / 1000000;
-                break;
-            case '7': // PERFIL DOBLE T
-                pesoUnitario = ((anchoB * espesorS * 2) + ((altoA - 2*espesorS) * espesorT)) * longitud * densidad / 1000000;
-                break;
-            case '8': // PERFIL U
-                pesoUnitario = ((anchoB * espesorS * 2) + ((altoA - espesorS) * espesorT)) * longitud * densidad / 1000000;
-                break;
-            case '10': // PLETINA
-                pesoUnitario = (altoA * anchoB * longitud * densidad) / 1000000;
-                break;
-            case '11': // CHAPA
-                pesoUnitario = (altoA * anchoB * espesorT * densidad) / 1000;
-                break;
-        }
+        const campoMaquinaMin = document.getElementById('txt_costoHoraHombre');
+        if (campoMaquinaMin) campoMaquinaMin.value = mt.toFixed(3);
 
-        const pesoTotal = pesoUnitario * cantidad;
-        const precioTotal = pesoTotal * precioKg;
+        const campoM = document.getElementById('txt_valorM');
+        if (campoM) campoM.value = valorM.toFixed(3);
+    }
+    function redondear(num, decimales) {
+        const factor = Math.pow(10, decimales);
+        return Math.floor(num * factor) / factor;
+    }
 
-        // Actualizar resultados
-        document.getElementById('resultado_peso').value = pesoUnitario.toFixed(2);
-        document.getElementById('resultado_peso_total').value = pesoTotal.toFixed(2);
-        document.getElementById('resultado_precio_total').value = precioTotal.toFixed(2);
-    };
+    // Página 2 – Calcular el costo total usando los valores guardados
+    function calcularCostosOperacion() {
+        const valorM = parseFloat(localStorage.getItem("valorM")) || 0;
+        const mt = parseFloat(localStorage.getItem("mt")) || 0;
+        console.log("mt recuperado:", mt);
+        console.log("valorM recuperado:", valorM);
+        const tiempoOcio = parseFloat(document.getElementById('txt_tiempoOcio').value) || 0;
+        const tiempoCambio = parseFloat(document.getElementById('txt_tiempoCambio').value) || 0;
+        const numeroPzs = parseFloat(document.getElementById('txt_numeroPzs').value) || 0;
+        const numeroHerramientas = parseFloat(document.getElementById('txt_numeroHerramientas').value) || 0;
+        const costoHerramientas = parseFloat(document.getElementById('txt_costoHerramientas').value) || 0;
+        const riesgo = parseFloat(document.getElementById('txt_riesgo').value) || 0;
 
-    const calcularPorPeso = (valores, densidad) => {
-        const { altoA, anchoB, diametro, espesorT, espesorS, peso, cantidad } = valores;
-        let longitud = 0;
+        const tiempoTotal = (numeroPzs * tiempoOcio) + (numeroPzs * mt) + (numeroHerramientas * tiempoCambio);
+        const costoTotal = (valorM * tiempoTotal) + (numeroHerramientas * costoHerramientas) + riesgo;
 
-        switch(estado.figuraActual) {
-            case '1': // HEXÁGONO
-                longitud = (peso * 1000000) / (2.598 * (anchoB ** 2) * densidad);
-                break;
-            case '2': // REDONDO
-                longitud = (peso * 1000000) / (Math.PI * (diametro ** 2) / 4 * densidad);
-                break;
-            case '3': // TUBO REDONDO
-                const diametroInterior = diametro - 2 * espesorT;
-                longitud = (peso * 1000000) / (Math.PI * (diametro ** 2 - diametroInterior ** 2) / 4 * densidad);
-                break;
-            case '4': // CUADRADO
-                longitud = (peso * 1000000) / (altoA * altoA * densidad);
-                break;
-            case '5': // TUBO CUADRADO
-                const areaExterior = altoA * anchoB;
-                const areaInterior = (altoA - 2*espesorT) * (anchoB - 2*espesorT);
-                longitud = (peso * 1000000) / ((areaExterior - areaInterior) * densidad);
-                break;
-            case '6': // PERFIL T
-            case '9': // ANGULO
-                longitud = (peso * 1000000) / (((altoA * espesorT) + ((anchoB - espesorT) * espesorT)) * densidad);
-                break;
-            case '7': // PERFIL DOBLE T
-                longitud = (peso * 1000000) / (((anchoB * espesorS * 2) + ((altoA - 2*espesorS) * espesorT)) * densidad);
-                break;
-            case '8': // PERFIL U
-                longitud = (peso * 1000000) / (((anchoB * espesorS * 2) + ((altoA - espesorS) * espesorT)) * densidad);
-                break;
-            case '10': // PLETINA
-                longitud = (peso * 1000000) / (altoA * anchoB * densidad);
-                break;
-            case '11': // CHAPA
-                longitud = (peso * 1000) / (altoA * anchoB * espesorT * densidad);
-                break;
-        }
-
-        // Convertir de mm a metros
-        longitud = longitud / 1000;
-        const longitudTotal = longitud * cantidad;
-
-        // Actualizar resultados
-        document.getElementById('resultado_longitud').value = longitud.toFixed(2);
-        document.getElementById('resultado_longitud_total').value = longitudTotal.toFixed(2);
-    };
-
-    const calcularResultados = () => {
-        const valores = {
-            altoA: getValorInput(elementos.inputs.alto, true),
-            anchoB: getValorInput(elementos.inputs.ancho, true),
-            diametro: getValorInput(elementos.inputs.diametro, true),
-            espesorT: getValorInput(elementos.inputs.espesorT, true),
-            espesorS: getValorInput(elementos.inputs.espesorS, true),
-            longitud: getValorInput(elementos.inputs.longitud, true),
-            peso: getValorInput(elementos.inputs.peso),
-            cantidad: getValorInput(elementos.inputs.cantidad),
-            precioKg: getValorInput(elementos.inputs.precio)
-        };
-
-        const densidad = parseFloat(elementos.densidadMaterial.value) || 0;
-
-        if (estado.modoCalculo === 'longitud') {
-            calcularPorLongitud(valores, densidad);
+        const campoCostosOperacion = document.getElementById('txt_costoTotal_costoOperacion');
+        if (campoCostosOperacion) {
+            campoCostosOperacion.value = redondear(costoTotal, 4);
+            localStorage.setItem('costoOperacion', costoTotal)
         } else {
-            calcularPorPeso(valores, densidad);
+            console.error("Elemento txt_costoTotal_costoOperacion no encontrado");
         }
-    };
+    }
 
-    const limpiarFormulario = () => {
-        // Limpiar inputs
-        Object.values(elementos.inputs).forEach(input => {
-            if (input) input.value = input.id === 'number_cantidad' ? '1' : '';
+    // Listeners para actualizar los valores al cambiar inputs
+    const camposMetodo1 = ['txt_sueldo', 'txt_porcentajeTrabajador', 'txt_costoMaquina', 'txt_porcentajeMaquinaria'];
+    camposMetodo1.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.addEventListener('input', function () {
+                calcularvalorM();
+                calcularCostosOperacion();
+            });
+        }
+    });
+
+    const camposMetodo2 = ['txt_tiempoOcio', 'txt_tiempoCambio',
+        'txt_numeroPzs', 'txt_numeroHerramientas', 'txt_costoHerramientas', 'txt_riesgo'];
+    camposMetodo2.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.addEventListener('input', calcularCostosOperacion);
+        }
+    });
+
+    // Cálculo inicial
+    calcularvalorM();
+    calcularCostosOperacion();
+});
+
+
+
+// ========================================================
+// COSTOS GENERALES
+// ========================================================
+
+document.addEventListener("DOMContentLoaded", function () {
+    // Elementos del formulario
+    const costoKgInput = document.getElementById('txt_costoKg');
+    const costoTotalInput = document.getElementById('txt_costoTotal');
+    const metalGralInput = document.getElementById('txt_metalGral');
+    const costoGralInput = document.getElementById('txt_costoGral');
+    const utilidadInput = document.getElementById('txt_utilidad');
+    const costoFinalInput = document.getElementById('txt_costoFinal');
+    const metalGralLabel = document.getElementById('metalGral');
+    const container = document.getElementById('contenedor-acabados');
+
+    // Recuperar datos de localStorage
+    function recuperarDatos() {
+        // Recuperar Costo KG dimenciones acero
+        const costoKg = parseFloat(localStorage.getItem('costoKg')) || 0;
+        costoKgInput.value = costoKg.toFixed(3);
+
+        // Recuperar costo total de operación de la página anterior
+        const costoOperacion = parseFloat(localStorage.getItem('costoOperacion')) || 0;
+        costoTotalInput.value = costoOperacion.toFixed(3);
+
+        // Recuperar tipo de material seleccionado
+        const tipoMaterial = localStorage.getItem('tipoMaterial') || '';
+
+        // Calcular automáticamente al cargar
+        calcularCostosGenerales();
+    }
+function generarAcabadoespecial() {
+    const container = document.getElementById('contenedor-acabados');
+    if (!container) return;
+
+    const idsGuardados = JSON.parse(localStorage.getItem('acabadosEspeciales')) || [];
+
+    idsGuardados.forEach(id => {
+        const label = document.querySelector(`label[for="${id}"]`);
+        if (!label) return;
+
+        const nombreElemento = label.textContent.trim();
+
+        const div = document.createElement('div');
+        div.className = 'col-md-6';
+
+        div.innerHTML = `
+            <label class="form-label">Ingrese ${nombreElemento.toLowerCase()}</label>
+            <div class="input-group">
+                <input type="number" class="form-control" placeholder="Ingrese dato" id="${nombreElemento.toLowerCase()}">
+            </div>
+        `;
+
+        container.appendChild(div);
+    });
+}
+
+    
+
+    // Función para calcular costos generales
+    function calcularCostosGenerales() {
+        const costoKg = parseFloat(costoKgInput.value) || 0;
+        const costoTotal = parseFloat(costoTotalInput.value) || 0;
+        const metalGral = parseFloat(metalGralInput.value) || 0;
+        const costoGral = parseFloat(costoGralInput.value) || 0;
+        const utilidad = parseFloat(utilidadInput.value) || 0;
+
+        // Calcular costo base (costo total + costo por kg)
+        const costoBase = costoTotal + (costoTotal * costoKg / 100);
+
+        // Calcular costo con acabado especial
+        const costoConAcabado = costoBase + metalGral;
+
+        // Calcular costo con gastos generales
+        const costoConGastos = costoConAcabado + (costoConAcabado * costoGral / 100);
+
+        // Calcular costo final con utilidad
+        const costoFinal = costoConGastos + (costoConGastos * utilidad / 100);
+
+        // Mostrar resultado
+        costoFinalInput.value = costoFinal.toFixed(2);
+    }
+
+    // Event listeners para cálculo en tiempo real
+    [costoKgInput, costoTotalInput, metalGralInput, costoGralInput, utilidadInput].forEach(input => {
+        input.addEventListener('input', calcularCostosGenerales);
+    });
+
+    // Botón de navegación
+    const btnAceptar = document.getElementById('btn_aceptar_costoGeneral');
+    if (btnAceptar) {
+        btnAceptar.addEventListener('click', function () {
+            // Guardar el costo final en localStorage
+            localStorage.setItem('costoFinal', costoFinalInput.value);
+
+            // Navegar a la siguiente página
+            window.location.href = "MAQUINADOS_11_resumenCostos.html";
         });
+    }
 
-        // Restablecer estado inicial
-        estado = {
-            modoCalculo: 'longitud',
-            figuraActual: '1',
-            materialActual: 'acero'
-        };
+    // Inicializar
+    recuperarDatos();
+    generarAcabadoespecial();
+});
 
-        // Actualizar interfaz
-        elementos.selecFigura.value = '1';
-        elementos.imgFigura.src = CONFIG.imagenes['1'];
-        elementos.selecMaterial.value = 'acero';
-        elementos.densidadMaterial.value = CONFIG.densidades['acero'];
-        elementos.botonesModo.longitud.classList.add('active');
-        elementos.botonesModo.peso.classList.remove('active');
+// ========================================================
+// RESUMEN COSTOS
+// ========================================================
 
-        // Limpiar resultados
-        document.querySelectorAll('#resultados_longitud input, #resultados_peso input').forEach(input => {
-            input.value = '';
-        });
+document.addEventListener("DOMContentLoaded", function () {
 
-        actualizarInterfaz();
-    };
-
-    // =============================================
-    // EVENT LISTENERS
-    // =============================================
-    elementos.selecFigura.addEventListener('change', function() {
-        estado.figuraActual = this.value;
-        elementos.imgFigura.src = CONFIG.imagenes[this.value] || '';
-        actualizarInterfaz();
-        calcularResultados();
-    });
-
-    elementos.selecMaterial.addEventListener('change', function() {
-        estado.materialActual = this.value;
-        elementos.densidadMaterial.value = CONFIG.densidades[this.value] || '0';
-        calcularResultados();
-    });
-
-    elementos.botonesModo.longitud.addEventListener('click', () => {
-        estado.modoCalculo = 'longitud';
-        elementos.botonesModo.longitud.classList.add('active');
-        elementos.botonesModo.peso.classList.remove('active');
-        actualizarInterfaz();
-        calcularResultados();
-    });
-
-    elementos.botonesModo.peso.addEventListener('click', () => {
-        estado.modoCalculo = 'peso';
-        elementos.botonesModo.peso.classList.add('active');
-        elementos.botonesModo.longitud.classList.remove('active');
-        actualizarInterfaz();
-        calcularResultados();
-    });
-
-    // Eventos para inputs (cálculos en tiempo real)
-    document.querySelectorAll('#campos_dimensiones input, #campos_dimensiones select').forEach(input => {
-        input.addEventListener('input', calcularResultados);
-    });
-
-
-    elementos.btnLimpiar.addEventListener('click', limpiarFormulario);
-
-    // =============================================
-    // INICIALIZACIÓN
-    // =============================================
-    elementos.densidadMaterial.value = CONFIG.densidades['acero'];
-    actualizarInterfaz();
-    calcularResultados(); // Calcular resultados iniciales
+    function calcularTiempoMaquinado() {
+        // Obtener valores y unidades
+        const txt_costoTotalGral = parseFloat(document.getElementById('txt_costoTotalGral').value) || 0;
+    }
 });

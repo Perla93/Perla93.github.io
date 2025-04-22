@@ -164,3 +164,7 @@ img.img-fluid {
     font-weight: bold; /* Opcional: para resaltar más el texto */
     font-size: 1.2rem; /* Opcional: para ajustar el tamaño del texto */
 }
+.activo {
+    background-color: #007bff;
+    color: white;
+}

@@ -9,7 +9,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../src/css/styles.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="../src/js/scripts_maquinados.js" defer></script>
+    <script src="../src/js/scripts_maquinados_volumenes.js" defer></script>
 </head>
 
 <body>
@@ -26,19 +26,49 @@
             <div class="col-md-6">
                 <label class="form-label">Ingrese el avance</label>
                 <div class="input-group">
-                    <input type="number" class="form-control" placeholder="Ingrese dato" id="btn_avance">
+                    <input type="number" class="form-control" placeholder="Ingrese dato" id="txt_avance">
+                    <select class="form-select" id="unidad_avance">
+                        <option value="mm_rev" selected>mm/rev</option>
+                        <option value="mm_min">mm/min</option>
+                        <option value="in_rev">pulg/rev</option>
+                        <option value="in_min">pulg/min</option>
+                    </select>
                 </div>
             </div>
             <div class="col-md-6">
                 <label class="form-label">Ingrese la velocidad de corte</label>
                 <div class="input-group">
-                    <input type="number" class="form-control" placeholder="Ingresa dato" id="btn_velocidadCorte">
+                    <input type="number" class="form-control" placeholder="Ingresa dato" id="txt_velocidadCorte">
+                    <select class="form-select" id="unidad_velocidad">
+                        <option value="m_min" selected>m/min</option>
+                        <option value="mm_min">mm/min</option>
+                        <option value="ft_min">pies/min</option>
+                        <option value="in_min">pulg/min</option>
+                    </select>
                 </div>
             </div>
             <div class="col-md-6">
                 <label class="form-label">Tiempo de maquinado</label>
                 <div class="input-group">
-                    <input type="number" class="form-control" id="btn_tiempoMaquinado">
+                    <input type="number" class="form-control" id="txt_tiempoMaquinado" readonly>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Volumen inicial</label>
+                <div class="input-group">
+                    <input type="number" class="form-control" id="mostrar_volumenInicial" readonly>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Volumen final </label>
+                <div class="input-group">
+                    <input type="number" class="form-control" id="mostrar_volumenFinal" readonly>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Volumen (Diferencia) </label>
+                <div class="input-group">
+                    <input type="number" class="form-control" id="mostrar_diferencia" readonly>
                 </div>
             </div>
         </div>
@@ -47,7 +77,7 @@
     <!-- Buttons for Calculation and Reset -->
     <div class="row justify-content-around">
         <div class="col-4">
-            <button type="button" class="btn btn-primary btn-lg" id="btn_aceptar_tiempoMaquina">ACEPTAR</button>
+            <button type="button" class="btn btn-primary btn-lg" id="btn_aceptar_tiempoMaquina">SIGUIENTE</button>
         </div>
         <div class="col-4">
             <button type="button" class="btn btn-primary btn-lg" id="btn_limpiar_tiempoMaquina">LIMPIAR</button>
