@@ -17,6 +17,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 // Guardar datos antes de navegar
                 if (id === "btn_siguiene_volumenInicial") {
                     const volumenInicial = document.getElementById('txt_volumenI').value;
+
                     localStorage.setItem('volumenInicial', volumenInicial);
                     localStorage.setItem('volumenFinalAcumulado', '0'); // Inicializar acumulador
                 }
@@ -43,6 +44,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 // Guardar el nuevo acumulado
                 localStorage.setItem('volumenFinalAcumulado', acumulado.toString());
+                localStorage.setItem('volumenFinalGuardado', document.getElementById('mostrar_volumenFinal').value);
 
                 // Verificar si necesita añadir otro volumen
                 if (checkOtroVolumen.checked) {
@@ -61,29 +63,38 @@ document.addEventListener("DOMContentLoaded", function () {
         const volumenInicial = parseFloat(localStorage.getItem('volumenInicial')) || 0;
         const volumenFinal = parseFloat(localStorage.getItem('volumenFinalAcumulado')) || 0;
         const diferencia = volumenInicial - volumenFinal;
+        // Factores de conversión para volumen (de mm³ a la unidad seleccionada)
+        const factoresVolumen = {
+            '1e-9': 1,                   // mm³ (sin conversión)
+            '1e-6': 1e3,                  // cm³
+            '0.001': 1e6,                  // dm³
+            '1': 1e9,                      // m³
+            '1.6387064e-5': 1 / 1.6387064e-5,// in³
+            '0.028316846592': 1 / 0.028316846592, // ft³
+            '0.764554857984': 1 / 0.764554857984, // yd³
+            '1e-3': 1e3,                   // ml
+            '0.001': 1e6                   // l
+        };
 
-        // Mostrar los resultados en los elementos HTML
-        document.getElementById('mostrar_volumenInicial').value = volumenInicial.toFixed(3);
-        document.getElementById('mostrar_volumenFinal').value = volumenFinal.toFixed(3);
-        document.getElementById('mostrar_diferencia').value = diferencia.toFixed(3);
+        // Función para convertir y mostrar los volúmenes
+        function convertirVolumenes() {
+            const factor = parseFloat(document.getElementById('unidad_volumen').value);
+            const factorConversion = factoresVolumen[factor.toString()] || 1;
 
-        // Opcional: Mostrar las unidades (si decides mostrarlas como texto aparte)
-        // Crear elementos para mostrar las unidades si es necesario
-        const unidad = " cm³";
-        const unidadInicial = document.createElement('span');
-        unidadInicial.textContent = unidad;
-        document.getElementById('mostrar_volumenInicial').parentNode.appendChild(unidadInicial);
+            document.getElementById('mostrar_volumenInicial').value = (volumenInicial * factorConversion).toFixed(3);
+            document.getElementById('mostrar_volumenFinal').value = (volumenFinal * factorConversion).toFixed(3);
+            document.getElementById('mostrar_diferencia').value = (diferencia * factorConversion).toFixed(3);
+        }
 
-        const unidadFinal = document.createElement('span');
-        unidadFinal.textContent = unidad;
-        document.getElementById('mostrar_volumenFinal').parentNode.appendChild(unidadFinal);
+        // Configurar event listener para cambios en la unidad de volumen
+        document.querySelectorAll('#unidad_volumen').forEach(select => {
+            select.addEventListener('change', convertirVolumenes);
+        });
 
-        const unidadDiferencia = document.createElement('span');
-        unidadDiferencia.textContent = unidad;
-        document.getElementById('mostrar_diferencia').parentNode.appendChild(unidadDiferencia);
+        // Mostrar los valores iniciales
+        convertirVolumenes();
     }
 });
-
 
 document.addEventListener("DOMContentLoaded", function () {
     // Factores de conversión para avance
@@ -131,35 +142,36 @@ document.addEventListener("DOMContentLoaded", function () {
         const unidadAvance = document.getElementById('unidad_avance').value;
         const unidadVelocidad = document.getElementById('unidad_velocidad').value;
         const diferencia = parseFloat(document.getElementById('mostrar_diferencia').value) || 0; // [mm³]
-    
-        // Si necesitas usar mm_min o in_min, puedes asignar un RPM fijo aquí (ejemplo: 1000)
-        const rpm = 1000;
-    
-        // Convertir velocidad a m/min
-        const velocidadConvertida = convertirVelocidad(velocidad, unidadVelocidad);
-    
-        // Convertir avance a mm/rev
-        const avanceConvertido = convertirAvance(avance, unidadAvance, rpm);
-    
-        // Calcular tiempoMaquinado
+
+        // Convertir velocidad a mm/min (ya que el volumen está en mm³)
+        const velocidadConvertida = convertirVelocidad(velocidad, unidadVelocidad) * 100;
+
+        // Convertir avance a mm/min
+        const avanceConvertido = convertirAvance(avance, unidadAvance, 1) * 10;
+
+        // Calcular tiempoMaquinado para torneado cilíndrico
+        // Fórmula corregida: tiempo = diferencia / (avance * velocidad)
         const tiempoMaquinado = (avanceConvertido > 0 && velocidadConvertida > 0)
             ? diferencia / (avanceConvertido * velocidadConvertida)
             : 0;
-    
+            
+            if (!isNaN(avance)) {
+                localStorage.setItem('avanceGuardado', JSON.stringify({
+                    valor: avance,
+                    unidad: unidadAvance
+                }));
+            }
+
         // Mostrar resultado en 'txt_tiempoMaquinado' si el elemento existe
         const campoTiempo = document.getElementById('txt_tiempoMaquinado');
         if (campoTiempo) {
-            campoTiempo.value = tiempoMaquinado.toFixed(3);
+            campoTiempo.value = tiempoMaquinado.toFixed(3); // Más decimales para precisión
+            if (!isNaN(campoTiempo)) { // Solo guardar si es un número válido
+                localStorage.setItem('tiempoMaquinadoGuardado', campoTiempo);
+            }
         }
-    
-        // Mostrar resultado (en horas con 2 decimales)
-        const tiempoHoras = tiempoMaquinado / 60;
-        document.getElementById('resultado_tiempo').textContent =
-            tiempoHoras > 1 ?
-                tiempoHoras.toFixed(2) + " horas" :
-                tiempoMaquinado.toFixed(2) + " minutos";
     }
-    
+
 
     // Configurar event listeners para cálculo en tiempo real
     const campos = [
@@ -209,8 +221,8 @@ document.addEventListener("DOMContentLoaded", function () {
     // Valores de conversión a metros (unidad base)
     const unidades = {
         longitud: [
-            { value: '0.001', text: 'milímetros (mm)' },
-            { value: '0.01', text: 'centímetros (cm)', selected: true },
+            { value: '0.001', text: 'milímetros (mm)', selected: true },
+            { value: '0.01', text: 'centímetros (cm)' },
             { value: '1', text: 'metros (m)' },
             { value: '0.0254', text: 'pulgadas (in)' },
             { value: '0.3048', text: 'pies (ft)' },
@@ -221,8 +233,8 @@ document.addEventListener("DOMContentLoaded", function () {
             { value: '1000000', text: 'metros / centímetros (m / cm)' }
         ],
         volumen: [
-            { value: '1e-9', text: 'milímetros cúbicos (mm³)' },
-            { value: '1e-6', text: 'centímetros cúbicos (cm³)', selected: true },
+            { value: '1e-9', text: 'milímetros cúbicos (mm³)', selected: true },
+            { value: '1e-6', text: 'centímetros cúbicos (cm³)' },
             { value: '0.001', text: 'decímetros cúbicos (dm³)' },
             { value: '1', text: 'metros cúbicos (m³)' },
             { value: '1.6387064e-5', text: 'pulgadas cúbicas (in³)' },
@@ -551,6 +563,7 @@ document.addEventListener("DOMContentLoaded", function () {
         } else {
             txtVolumenI.value = '';
         }
+
     }
 
 

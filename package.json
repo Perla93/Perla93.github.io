@@ -1,0 +1,18 @@
+{
+  "name": "metal-company-frontend",
+  "version": "1.0.0",
+  "description": "Responsive front end for a metal company using Bootstrap.",
+  "main": "src/index.html",
+  "scripts": {
+    "start": "live-server src",
+    "build": "echo 'Build process can be defined here.'"
+  },
+  "dependencies": {
+    "bootstrap": "^5.3.0"
+  },
+  "devDependencies": {
+    "live-server": "^1.2.1"
+  },
+  "author": "Your Name",
+  "license": "MIT"
+}

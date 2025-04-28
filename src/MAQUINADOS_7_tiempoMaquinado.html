@@ -28,8 +28,8 @@
                 <div class="input-group">
                     <input type="number" class="form-control" placeholder="Ingrese dato" id="txt_avance">
                     <select class="form-select" id="unidad_avance">
-                        <option value="mm_rev" selected>mm/rev</option>
-                        <option value="mm_min">mm/min</option>
+                        <option value="mm_rev" >mm/rev</option>
+                        <option value="mm_min" selected>mm/min</option>
                         <option value="in_rev">pulg/rev</option>
                         <option value="in_min">pulg/min</option>
                     </select>
@@ -40,8 +40,8 @@
                 <div class="input-group">
                     <input type="number" class="form-control" placeholder="Ingresa dato" id="txt_velocidadCorte">
                     <select class="form-select" id="unidad_velocidad">
-                        <option value="m_min" selected>m/min</option>
-                        <option value="mm_min">mm/min</option>
+                        <option value="m_min" >m/min</option>
+                        <option value="mm_min" selected>mm/min</option>
                         <option value="ft_min">pies/min</option>
                         <option value="in_min">pulg/min</option>
                     </select>
@@ -50,25 +50,38 @@
             <div class="col-md-6">
                 <label class="form-label">Tiempo de maquinado</label>
                 <div class="input-group">
-                    <input type="number" class="form-control" id="txt_tiempoMaquinado" readonly>
+                    <input type="number" class="form-control" id="txt_tiempoMaquinado" readonly> <input type="text" value="min" class="form-control" id="txt_min" readonly>
                 </div>
             </div>
             <div class="col-md-6">
                 <label class="form-label">Volumen inicial</label>
                 <div class="input-group">
                     <input type="number" class="form-control" id="mostrar_volumenInicial" readonly>
+                    <select class="form-select" id="unidad_volumen">
+                        <option value="1e-9" selected>milímetros cúbicos (mm³)</option>
+                        <option value="1e-6" >centímetros cúbicos (cm³)</option>
+                        <option value="0.001">decímetros cúbicos (dm³)</option>
+                        <option value="1">metros cúbicos (m³)</option>
+                        <option value="1.6387064e-5">pulgadas cúbicas (in³)</option>
+                        <option value="0.028316846592">pies cúbicos (ft³)</option>
+                        <option value="0.764554857984">yardas cúbicas (yd³)</option>
+                        <option value="1e-3">mililitros (ml)</option>
+                        <option value="0.001">litros (l)</option>
+                    </select>
                 </div>
             </div>
             <div class="col-md-6">
                 <label class="form-label">Volumen final </label>
                 <div class="input-group">
                     <input type="number" class="form-control" id="mostrar_volumenFinal" readonly>
+                   
                 </div>
             </div>
             <div class="col-md-6">
                 <label class="form-label">Volumen (Diferencia) </label>
                 <div class="input-group">
                     <input type="number" class="form-control" id="mostrar_diferencia" readonly>
+                  
                 </div>
             </div>
         </div>

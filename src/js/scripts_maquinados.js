@@ -28,18 +28,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const btnAceptar = document.getElementById("btn_aceptar_tipoMaquinado");
     const btnLimpiar = document.getElementById("btn_limpiar_tipoMaquinado");
 
-    // Función para obtener los checkboxes seleccionados
-    const getCheckboxesSeleccionados = () => {
-        return Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
-            .map(checkbox => checkbox.nextElementSibling.textContent);
-    };
-
-    // Evento para el botón aceptar
     if (btnAceptar) {
         btnAceptar.addEventListener("click", function () {
-            const seleccionados = getCheckboxesSeleccionados();
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
 
-            if (seleccionados.length === 0) {
+            if (checkboxes.length === 0) {
                 Swal.fire({
                     title: '¡Atención!',
                     text: 'Por favor selecciona al menos un tipo de maquinado.',
@@ -48,14 +41,21 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
                 return;
             }
-            const especialesSeleccionados = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
-            .filter(cb => cb.value === '2')
-            .map(cb => cb.id);
-        localStorage.setItem('acabadosEspeciales', JSON.stringify(especialesSeleccionados));
+
+            const todosSeleccionados = [];
+            const value2Seleccionados = [];
+
+            checkboxes.forEach(cb => {
+                const label = cb.nextElementSibling?.textContent.trim() || "Opción sin nombre";
+                todosSeleccionados.push(label);
+                if (cb.value === "2") {
+                    value2Seleccionados.push(label);
+                }
+            });
 
             Swal.fire({
                 title: 'Tipos de maquinado seleccionados',
-                html: `Has seleccionado:<br>• ${seleccionados.join('<br>• ')}`,
+                html: `Has seleccionado:<br>• ${todosSeleccionados.join('<br>• ')}`,
                 icon: 'info',
                 showDenyButton: true,
                 confirmButtonText: 'Siguiente',
@@ -67,6 +67,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 buttonsStyling: false
             }).then((result) => {
                 if (result.isConfirmed) {
+                    localStorage.setItem("acabadosEspeciales", JSON.stringify(value2Seleccionados));
+                    localStorage.setItem("tiposmaquinados", JSON.stringify(todosSeleccionados));
                     window.location.href = "MAQUINADOS_3_tipoMaterial.html";
                     // window.location.href = "MAQUINADOS_10_costosGenerales.html";
                 } else if (result.isDenied) {
@@ -76,7 +78,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Evento para el botón limpiar
     if (btnLimpiar) {
         btnLimpiar.addEventListener("click", function () {
             document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
@@ -88,7 +89,6 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         });
     }
-   
 });
 
 // Selectores de tipos de material
@@ -222,6 +222,12 @@ document.addEventListener("DOMContentLoaded", function () {
             selectorSubtipoMaterial.appendChild(option);
         });
     });
+    selectorSubtipoMaterial.addEventListener("change", function () {
+        if (selectorTipoMaterial.value && selectorSubtipoMaterial.value) {
+            localStorage.setItem("materialSeleccionado",
+                `${selectorTipoMaterial.value} : ${selectorSubtipoMaterial.value}`);
+        }
+    });
 });
 
 
@@ -244,7 +250,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const minutosPorHora = 60;
         wo = sueldoSemanal / (horasPorSemana * minutosPorHora); // Pago por minuto
 
-        const minutosEnUnAnio = 365 * 24 * 60;
+        const minutosEnUnAnio = 52 * 48 * 60;
         const mt = costoMaquinaria / minutosEnUnAnio; // Costo máquina por minuto
 
         const valorM = wo + (porcentaje_wo / 100) * wo + mt + (porcentaje_mt / 100) * mt;
@@ -272,21 +278,20 @@ document.addEventListener("DOMContentLoaded", function () {
         return Math.floor(num * factor) / factor;
     }
 
-    // Página 2 – Calcular el costo total usando los valores guardados
+    // Costos Operación
+
     function calcularCostosOperacion() {
         const valorM = parseFloat(localStorage.getItem("valorM")) || 0;
-        const mt = parseFloat(localStorage.getItem("mt")) || 0;
-        console.log("mt recuperado:", mt);
-        console.log("valorM recuperado:", valorM);
+        const mt = parseFloat(localStorage.getItem("mt")) || 0;  //tiempo de maquinado, de volumen 
         const tiempoOcio = parseFloat(document.getElementById('txt_tiempoOcio').value) || 0;
         const tiempoCambio = parseFloat(document.getElementById('txt_tiempoCambio').value) || 0;
         const numeroPzs = parseFloat(document.getElementById('txt_numeroPzs').value) || 0;
         const numeroHerramientas = parseFloat(document.getElementById('txt_numeroHerramientas').value) || 0;
         const costoHerramientas = parseFloat(document.getElementById('txt_costoHerramientas').value) || 0;
         const riesgo = parseFloat(document.getElementById('txt_riesgo').value) || 0;
+        const costoTotal = ((valorM * ((numeroPzs * tiempoOcio) + (numeroPzs * mt) + (numeroHerramientas * tiempoCambio))) + (numeroHerramientas * costoHerramientas)) * (riesgo / 100);
 
-        const tiempoTotal = (numeroPzs * tiempoOcio) + (numeroPzs * mt) + (numeroHerramientas * tiempoCambio);
-        const costoTotal = (valorM * tiempoTotal) + (numeroHerramientas * costoHerramientas) + riesgo;
+        localStorage.setItem('costoHerramientas', costoHerramientas.toFixed(3));
 
         const campoCostosOperacion = document.getElementById('txt_costoTotal_costoOperacion');
         if (campoCostosOperacion) {
@@ -328,116 +333,216 @@ document.addEventListener("DOMContentLoaded", function () {
 // ========================================================
 // COSTOS GENERALES
 // ========================================================
-
 document.addEventListener("DOMContentLoaded", function () {
     // Elementos del formulario
     const costoKgInput = document.getElementById('txt_costoKg');
     const costoTotalInput = document.getElementById('txt_costoTotal');
-    const metalGralInput = document.getElementById('txt_metalGral');
-    const costoGralInput = document.getElementById('txt_costoGral');
+    const contenedorAcabados = document.getElementById("inputs-acabados");
+    const logistica = document.getElementById('txt_logistica');
+    const administracion = document.getElementById('txt_administracion');
     const utilidadInput = document.getElementById('txt_utilidad');
-    const costoFinalInput = document.getElementById('txt_costoFinal');
-    const metalGralLabel = document.getElementById('metalGral');
-    const container = document.getElementById('contenedor-acabados');
+    const IVAInput = document.getElementById('txt_IVA');
+    const costoFinalsinIVAInput = document.getElementById('txt_costoFinalsinIVA');
+    const costoFinalconIVAInput = document.getElementById('txt_costoFinalconIVA');
+
+ 
 
     // Recuperar datos de localStorage
     function recuperarDatos() {
-        // Recuperar Costo KG dimenciones acero
         const costoKg = parseFloat(localStorage.getItem('costoKg')) || 0;
         costoKgInput.value = costoKg.toFixed(3);
 
-        // Recuperar costo total de operación de la página anterior
         const costoOperacion = parseFloat(localStorage.getItem('costoOperacion')) || 0;
         costoTotalInput.value = costoOperacion.toFixed(3);
 
-        // Recuperar tipo de material seleccionado
-        const tipoMaterial = localStorage.getItem('tipoMaterial') || '';
+        const acabados = JSON.parse(localStorage.getItem("acabadosEspeciales")) || [];
 
-        // Calcular automáticamente al cargar
+        // Limpia antes de volver a generar (por si acaso)
+        contenedorAcabados.innerHTML = '';
+
+        acabados.forEach(nombre => {
+            const div = document.createElement("div");
+            div.className = "col-md-6 mb-3"; // Mejor que tenga márgenes
+
+            const label = document.createElement("label");
+            label.className = "form-label";
+            label.textContent = nombre;
+
+            const input = document.createElement("input");
+            input.type = "number";
+            input.className = "form-control";
+            input.placeholder = "Ingrese el costo";
+            input.id = "txt_" + nombre.replace(/\s+/g, '_'); // Corrige si hay espacios
+
+            div.appendChild(label);
+            div.appendChild(input);
+            contenedorAcabados?.appendChild(div);
+
+            // Agrega el evento de input
+            input.addEventListener('input', calcularCostosGenerales);
+        });
+
         calcularCostosGenerales();
+ 
     }
-function generarAcabadoespecial() {
-    const container = document.getElementById('contenedor-acabados');
-    if (!container) return;
 
-    const idsGuardados = JSON.parse(localStorage.getItem('acabadosEspeciales')) || [];
-
-    idsGuardados.forEach(id => {
-        const label = document.querySelector(`label[for="${id}"]`);
-        if (!label) return;
-
-        const nombreElemento = label.textContent.trim();
-
-        const div = document.createElement('div');
-        div.className = 'col-md-6';
-
-        div.innerHTML = `
-            <label class="form-label">Ingrese ${nombreElemento.toLowerCase()}</label>
-            <div class="input-group">
-                <input type="number" class="form-control" placeholder="Ingrese dato" id="${nombreElemento.toLowerCase()}">
-            </div>
-        `;
-
-        container.appendChild(div);
-    });
-}
-
-    
-
-    // Función para calcular costos generales
     function calcularCostosGenerales() {
         const costoKg = parseFloat(costoKgInput.value) || 0;
-        const costoTotal = parseFloat(costoTotalInput.value) || 0;
-        const metalGral = parseFloat(metalGralInput.value) || 0;
-        const costoGral = parseFloat(costoGralInput.value) || 0;
-        const utilidad = parseFloat(utilidadInput.value) || 0;
+        const costoOperacion = parseFloat(costoTotalInput.value) || 0;
+        const logisticaCosto = parseFloat(logistica.value) || 0;
+        const administracionCosto = parseFloat(administracion.value) || 0;
+        const utilidadPorcentaje = parseFloat(utilidadInput.value) || 0;
+        const ivaPorcentaje = parseFloat(IVAInput.value) || 0;
 
-        // Calcular costo base (costo total + costo por kg)
-        const costoBase = costoTotal + (costoTotal * costoKg / 100);
+        let costoBase = costoKg + costoOperacion + logisticaCosto + administracionCosto;
 
-        // Calcular costo con acabado especial
-        const costoConAcabado = costoBase + metalGral;
+        // Sumar costos de los inputs de acabados especiales
+        const inputsAcabados = document.querySelectorAll("#inputs-acabados input");
+        inputsAcabados.forEach(input => {
+            const valor = parseFloat(input.value);
+            if (!isNaN(valor)) {
+                costoBase += valor;
+            }
+        });
 
-        // Calcular costo con gastos generales
-        const costoConGastos = costoConAcabado + (costoConAcabado * costoGral / 100);
+        let costoConUtilidad = costoBase + (costoBase * utilidadPorcentaje / 100);
 
-        // Calcular costo final con utilidad
-        const costoFinal = costoConGastos + (costoConGastos * utilidad / 100);
+        costoFinalsinIVAInput.value = costoConUtilidad.toFixed(2);
 
-        // Mostrar resultado
-        costoFinalInput.value = costoFinal.toFixed(2);
+        let costoConIVA = costoConUtilidad + (costoConUtilidad * ivaPorcentaje / 100);
+        costoFinalconIVAInput.value = costoConIVA.toFixed(2);
     }
 
-    // Event listeners para cálculo en tiempo real
-    [costoKgInput, costoTotalInput, metalGralInput, costoGralInput, utilidadInput].forEach(input => {
+    // Inputs fijos con eventos
+    [costoKgInput, costoTotalInput, utilidadInput, logistica, administracion, IVAInput].forEach(input => {
         input.addEventListener('input', calcularCostosGenerales);
     });
 
-    // Botón de navegación
     const btnAceptar = document.getElementById('btn_aceptar_costoGeneral');
-    if (btnAceptar) {
-        btnAceptar.addEventListener('click', function () {
-            // Guardar el costo final en localStorage
-            localStorage.setItem('costoFinal', costoFinalInput.value);
+if (btnAceptar) {
+    btnAceptar.addEventListener('click', function () {
+        // Guardar el costo final
+        localStorage.setItem('logistica', parseFloat(logistica.value).toString());
+        localStorage.setItem('administracion', administracion.toFixed(3));
+        localStorage.setItem('costoFinalsinIVA', costoFinalsinIVAInput.value);
+        localStorage.setItem('costoFinalconIVA', costoFinalconIVAInput.value);
 
-            // Navegar a la siguiente página
-            window.location.href = "MAQUINADOS_11_resumenCostos.html";
+        // Guardar los costos de acabados
+        const inputsAcabados = document.querySelectorAll("#inputs-acabados input");
+        const costosAcabados = [];
+
+        inputsAcabados.forEach(input => {
+            const nombre = input.previousElementSibling.textContent.trim(); // el label anterior
+            const costo = parseFloat(input.value) || 0;
+            costosAcabados.push({ nombre, costo });
         });
-    }
 
-    // Inicializar
+        localStorage.setItem('costosAcabados', JSON.stringify(costosAcabados));
+
+        // Ir al resumen
+        window.location.href = "MAQUINADOS_11_resumenCostos.html";
+    });
+}
+
     recuperarDatos();
-    generarAcabadoespecial();
 });
+
+
+
 
 // ========================================================
 // RESUMEN COSTOS
 // ========================================================
 
 document.addEventListener("DOMContentLoaded", function () {
+    // Elementos del formulario
+    const costoExtras = document.getElementById('txt_CostoExtras');
+    const costoTotalGral = document.getElementById('txt_costoTotalGral');
 
-    function calcularTiempoMaquinado() {
-        // Obtener valores y unidades
-        const txt_costoTotalGral = parseFloat(document.getElementById('txt_costoTotalGral').value) || 0;
+
+    function recuperarDatos() {
+        const listaMaquinados = document.getElementById("lista-maquinados");
+        const maquinados = JSON.parse(localStorage.getItem("tiposmaquinados")) || [];
+        // Mostrar los tipos de maquinado en una lista
+        if (listaMaquinados && maquinados.length > 0) {
+            maquinados.forEach(nombre => {
+                const li = document.createElement("li");
+                li.className = "list-group-item"; // opcional para estilo Bootstrap
+                li.textContent = nombre;
+                listaMaquinados.appendChild(li);
+            });
+        }
+
+        // Recuperar costos del localStorage y colocarlos en sus inputs
+        const costoKgInput = document.getElementById('txt_CostoKg');
+        const costoTotalInput = document.getElementById('txt_costoTotal');
+        const tiempoMaquinado = document.getElementById("txt_TiempoMaquinado");
+
+        const costoKg = parseFloat(localStorage.getItem('costoKg')) || 0;
+        if (costoKgInput) costoKgInput.value = costoKg.toFixed(3);
+
+        const costoOperacion = parseFloat(localStorage.getItem('costoOperacion')) || 0;
+        if (costoTotalInput) costoTotalInput.value = costoOperacion.toFixed(3);
+
+        const materialGuardado = localStorage.getItem("materialSeleccionado");
+        if (materialGuardado) {
+            const elementoResultado = document.getElementById("txt_tipoMaterial");
+            elementoResultado.textContent = materialGuardado;
+            // Opcional: limpiar el localStorage después de usarlo
+            localStorage.removeItem("materialSeleccionado");
+        }
+        const tiempoGuardado = parseFloat(localStorage.getItem('tiempoMaquinadoGuardado'));
+        if (tiempoGuardado) {
+            // Mostrarlo en un elemento HTML (ej: <span id="tiempoMostrado"></span>)
+            document.getElementById('txt_TiempoMaquinado').textContent = tiempoGuardado;
+        }
+
+        const valorM = parseFloat(localStorage.getItem("valorM")) || 0;
+        if (tiempoMaquinado) tiempoMaquinado.value = valorM.toFixed(3);
+
+        const volumenFinal = localStorage.getItem('volumenFinalGuardado');
+
+        if (volumenFinal) {
+            // Mostrar en un elemento HTML (ej: <span id="volumenFinalMostrado"></span>)
+            document.getElementById('volumenFinalMostrado').textContent = volumenFinal;
+        }
+
+        const avanceData = JSON.parse(localStorage.getItem('avanceGuardado'));
+        if (avanceData) {
+            const mensajeAvance = `Avance: ${avanceData.valor} ${avanceData.unidad}`;
+            document.getElementById('txt_avance').textContent = mensajeAvance;
+        }
+
+        const costoHerramientasGuardado = parseFloat(localStorage.getItem('costoHerramientas')) || 0;
+        document.getElementById('txt_CostoTotalHerramienta').value = costoHerramientasGuardado.toFixed(3);
+        
+        const logistica = parseFloat(localStorage.getItem('logistica')) || 0;
+        document.getElementById('txt_logistica').value = logistica.toFixed(3);
+
+        const administracion = parseFloat(localStorage.getItem('administracion')) || 0;
+        document.getElementById('txt_administracion').value = administracion.toFixed(3);
+
+        // Mostrar la tabla de costos de acabados
+const costosAcabados = JSON.parse(localStorage.getItem('costosAcabados')) || [];
+const tablaCostos = document.getElementById('tabla-costos-acabados').querySelector('tbody');
+
+costosAcabados.forEach(item => {
+    const tr = document.createElement('tr');
+
+    const tdNombre = document.createElement('td');
+    tdNombre.textContent = item.nombre;
+
+    const tdCosto = document.createElement('td');
+    tdCosto.textContent = `$${item.costo.toFixed(2)}`;
+
+    tr.appendChild(tdNombre);
+    tr.appendChild(tdCosto);
+    tablaCostos.appendChild(tr);
+});
+
+
+
     }
+
+    recuperarDatos();
 });

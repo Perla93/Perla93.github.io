@@ -24,44 +24,79 @@
         <div class="row justify-content-center" id="resultados">
             <div class="col-12 d-flex align-items-center mb-3">
                 <label class="form-label mb-0 me-2">Tipos de maquinado:</label>
-                <input type="text" class="form-control me-2" readonly>
+            </div>
+            <div class="col-12 d-flex align-items-center mb-3"> 
+                <ul id="lista-maquinados" class="list-group mt-3">
+                    <!-- Aquí se insertarán los <li> -->
+                  </ul>
+            </div>
+            <div class="col-12 d-flex align-items-center mb-3"> 
+                <label class="form-label mb-0 me-2">Tipo de material:</label> 
+                <input type="text" class="form-control me-6" id="txt_tipoMaterial" readonly>
             </div>
             <div class="col-12 d-flex align-items-center mb-3">
-                <label class="form-label mb-0 me-2">Tipo de material:</label>
-                <input type="text" class="form-control me-2" readonly>
+                <label class="form-label mb-0 me-2">Precio total de material:</label>
+                <input type="text" class="form-control me-6" id="txt_CostoKg" readonly>
             </div>
             <div class="col-12 d-flex align-items-center mb-3">
-                <label class="form-label mb-0 me-2">Costo total por kilogramo:</label>
-                <input type="text" class="form-control me-2" readonly>
-            </div>
-            <div class="col-12 d-flex align-items-center mb-3">
-                <label class="form-label mb-0 me-2">Costo de maquinaria H - H:</label>
-                <input type="text" class="form-control me-2" readonly>
+                <label class="form-label mb-0 me-2">Tiempo de maquinado</label>
+                <input type="text" class="form-control me-6" id="txt_TiempoMaquinado" readonly>
             </div>
             <div class="col-12 d-flex align-items-center mb-3">
                 <label class="form-label mb-0 me-2">Costo total de operación:</label>
-                <input type="text" class="form-control me-2" readonly>
+                <input type="text" class="form-control me-6" id="txt_CostoTotalOperacion" readonly>
             </div>
             <div class="col-12 d-flex align-items-center mb-3">
-                <label class="form-label mb-0 me-2">Costo total de trabajador:</label>
-                <input type="text" class="form-control me-2" readonly>
+                <label class="form-label mb-0 me-2">Volumen a maquinar:</label>
+                <input type="text" class="form-control me-6" id="txt_VolumenFinal" readonly>
             </div>
             <div class="col-12 d-flex align-items-center mb-3">
-                <label class="form-label mb-0 me-2">Costo total de herramienta:</label>
-                <input type="text" class="form-control me-2" readonly>
+                <label class="form-label mb-0 me-2">Avance:</label>
+                <input type="text" class="form-control me-6" id="txt_avance" readonly>
             </div>
             <div class="col-12 d-flex align-items-center mb-3">
-                <label class="form-label mb-0 me-2">Costo por servicios extra:</label>
-                <input type="text" class="form-control me-2" readonly>
+                <label class="form-label mb-0 me-2">Costo de herramienta:</label>
+                <input type="text" class="form-control me-6" id="txt_CostoTotalHerramienta" readonly>
+            </div>
+            <div class="col-12 d-flex align-items-center mb-3">
+                <label class="form-label mb-0 me-2">Logística:</label>
+                <input type="text" class="form-control me-6" id="txt_logistica" readonly>
+            </div>
+            <div class="col-12 d-flex align-items-center mb-3">
+                <label class="form-label mb-0 me-2">Administración:</label>
+                <input type="text" class="form-control me-6" id="txt_Administración" readonly>
+            </div>
+
+
+
+            <div class="col-12 d-flex align-items-center mb-3">
+                <label class="form-label mb-0 me-2">Costos extras:</label>
+            </div>
+            <div class="col-12 d-flex align-items-center mb-3">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm" id="tabla-costos-acabados">
+                        <thead>
+                            <tr>
+                                <th>Material</th>
+                                <th>Precio asignado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Se llenará dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
-
+    <div class="container my-4">
+        <h4 class="mt-4 text-primary">Resultados</h4>
+    </div>
        <!-- Inputs for Trabajador -->
     <div class="container mt-4">
         <div class="row g-3">
             <div class="col-md-6">
-                <label class="form-label">Costo total - general:</label>
+                <label class="form-label">Costo total </label>
                 <div class="input-group">
                     <input type="number" class="form-control" id="txt_costoTotalGral" readonly>
                 </div>
@@ -75,12 +110,11 @@
             <button type="button" class="btn btn-primary btn-lg" id="btn_guardar_resumenCosto">GUARDAR</button>
         </div>
         <div class="col-4">
-            <button type="button" class="btn btn-primary btn-lg" id="btn_limpiar_resumenCosto">LIMPIAR</button>
+            <button type="button" class="btn btn-primary btn-lg" id="btn_Regresar_Menu">MENÚ</button>
         </div>
     </div>
-    <div class="col-4">
-        <button type="button" class="btn btn-primary btn-lg" id="btn_Regresar_Menu">MENÚ</button>
-    </div>
+
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 

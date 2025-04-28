@@ -287,7 +287,7 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById('resultado_peso').value = `${pesoUnitario.toFixed(2)} kg / ${pesoLibras.toFixed(2)} lb`;
     document.getElementById('resultado_peso_total').value = `${pesoTotal.toFixed(2)} kg / ${pesoTotalLibras.toFixed(2)} lb`;
     document.getElementById('resultado_precio_total').value = precioKg ? `$${precioTotal.toFixed(2)}` : '';
-    localStorage.setItem('costoKg', precioTotal.toFixed(2))
+    localStorage.setItem('costoKg', costoKg.toFixed(2))
 };
 
     const calcularPorPeso = (valores, densidad) => {
